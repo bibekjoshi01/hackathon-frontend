@@ -281,8 +281,8 @@ AUTH_LINK_EXP_TIME = 10
 # ------------------------------------------------------------------------------
 OAUTH_PROVIDERS = {
     "google": {
-        "client_id": "353413819170-fe7trtonoe9msj6ojeg33di9f6rldpn2.apps.googleusercontent.com",
-        "client_secret": "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",
+        "client_id": env("GOOGLE_CLIENT_ID"),
+        "client_secret": env("GOOGLE_CLIENT_SECRET"),
     },
     "linkedin": {
         "client_id": "your-facebook-client-id",
