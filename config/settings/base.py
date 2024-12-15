@@ -30,17 +30,15 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
-    "django_celery_beat",
     "corsheaders",
     "rest_framework",
     "django_filters",
     "drf_spectacular",
     "rest_framework_simplejwt.token_blacklist",
     "mptt",
-    "django_elasticsearch_dsl",
 ]
 
-LOCAL_APPS = ["src.user", "src.blog", "src.product", "src.business"]
+LOCAL_APPS = ["src.user"]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -90,22 +88,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
-ASGI_APPLICATION = "config.asgi.application"
 
 
 # Database
 # ------------------------------------------------------------------------------
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("DB_NAME"),
-        "USER": env("DB_USER"),
-        "PASSWORD": env("DB_PASSWORD"),
-        "HOST": env("DB_HOST"),
-        "PORT": env("DB_PORT"),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     },
 }
-DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
 
 # EMAIL CONFIGURATION
@@ -130,7 +122,7 @@ SERVER_EMAIL='bibekjoshi34@gmail.com'
 EMAIL_HOST_USER='bibekjoshi34@gmail.com'
 EMAIL_HOST_PASSWORD='qcfgybnlrmollnhe'
 
-# PASSWORDS
+# PASSWORDS 
 # ------------------------------------------------------------------------------
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
@@ -285,35 +277,12 @@ FRONTEND_BASE_URL = env("FRONTEND_BASE_URL")
 AUTH_LINK_EXP_TIME = 10
 
 
-# Celery
-# ------------------------------------------------------------------------------
-REDIS_HOST = env("REDIS_HOST")
-REDIS_PORT = env("REDIS_PORT")
-REDIS_DB = env("REDIS_DB")
-
-if USE_TZ:
-    CELERY_TIMEZONE = TIME_ZONE
-CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
-CELERY_RESULT_BACKEND = CELERY_BROKER_URL
-CELERY_ACCEPT_CONTENT = ["application/json"]
-CELERY_RESULT_EXTENDED = True
-CELERY_RESULT_BACKEND_ALWAYS_RETRY = True
-CELERY_RESULT_BACKEND_MAX_RETRIES = 10
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
-CELERY_TASK_TIME_LIMIT = 5 * 60
-CELERY_TASK_SOFT_TIME_LIMIT = 60
-CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
-CELERY_WORKER_SEND_TASK_EVENTS = True
-CELERY_TASK_SEND_SENT_EVENT = True
-
-
 # OAUTH
 # ------------------------------------------------------------------------------
 OAUTH_PROVIDERS = {
     "google": {
-        "client_id": "197523093421-7dd93s0jup4ulbfovkn2krvvun0k7lph.apps.googleusercontent.com",
-        "client_secret": "your-google-client-secret",
+        "client_id": "353413819170-fe7trtonoe9msj6ojeg33di9f6rldpn2.apps.googleusercontent.com",
+        "client_secret": "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",
     },
     "linkedin": {
         "client_id": "your-facebook-client-id",
@@ -325,30 +294,3 @@ OAUTH_PROVIDERS = {
     },
 }
 SOCIAL_SECRET = "test@9085jfJdh"
-
-CELERY_TASK_EAGER_PROPAGATES = True
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [(REDIS_HOST, REDIS_PORT)],
-        },
-    },
-}
-
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
-
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
-    },
-}
-
-
-ELASTICSEARCH_DSL = {"default": {"hosts": "localhost:9200"}}
