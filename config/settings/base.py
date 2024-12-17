@@ -38,7 +38,7 @@ THIRD_PARTY_APPS = [
     "mptt",
 ]
 
-LOCAL_APPS = ["src.user"]
+LOCAL_APPS = ["src.user", "src.base", "src.parking_spot"]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -61,8 +61,6 @@ ROOT_URLCONF = "config.urls"
 # ADMIN
 # ------------------------------------------------------------------------------
 ADMIN_URL = "admin/"
-ADMINS = [("""Neeket Bhandari""", "neeket@gmail.com")]
-MANAGERS = [("""Bibek Joshi""", "bibekjoshi34@gmail.com")]
 
 
 # TEMPLATES
@@ -250,8 +248,8 @@ CORS_URLS_REGEX = r"^/api/.*$"
 
 SPECTACULAR_SETTINGS = {
     "SCHEMA_COMPONENT_SPLIT_UNDERSCORES": False,
-    "TITLE": "KEC Hackathon API",
-    "DESCRIPTION": "Documentation of API endpoints of Hackathon App",
+    "TITLE": "Parking Spot API",
+    "DESCRIPTION": "Documentation of API endpoints of Parkify App",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "POSTPROCESSING_HOOKS": [
@@ -273,7 +271,6 @@ SIMPLE_JWT = {
 # -------------------------------------------------------------------------------
 MAX_UPLOAD_SIZE = 2097152
 BLOG_MEDIA_MAX_UPLOAD_SIZE = 2097152
-FRONTEND_BASE_URL = env("FRONTEND_BASE_URL")
 AUTH_LINK_EXP_TIME = 10
 
 
@@ -283,14 +280,7 @@ OAUTH_PROVIDERS = {
     "google": {
         "client_id": env("GOOGLE_CLIENT_ID"),
         "client_secret": env("GOOGLE_CLIENT_SECRET"),
-    },
-    "linkedin": {
-        "client_id": "your-facebook-client-id",
-        "client_secret": "your-facebook-client-secret",
-    },
-    "apple": {
-        "client_id": "your-apple-client-id",
-        "client_secret": "your-apple-client-secret",
-    },
+    }
 }
+
 SOCIAL_SECRET = "test@9085jfJdh"

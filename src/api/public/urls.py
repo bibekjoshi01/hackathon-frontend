@@ -4,4 +4,5 @@ app_label = ["public"]
 
 urlpatterns = [
     path("user-app/", include("src.user.public.urls")),
+    path("parking-app/", include("src.parking_spot.public.urls")),
 ]

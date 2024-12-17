@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -6,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 class AbstractInfoModel(models.Model):
     """Abstract Created Info Model"""
 
+    uuid = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
     created_at = models.DateTimeField(
         _("created date"),
         default=timezone.now,
@@ -39,8 +41,9 @@ class AbstractInfoModel(models.Model):
 
 
 class PublicAbstractInfoModel(models.Model):
+    
     """Abstract Created Info Model For Public Models"""
-
+    uuid = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
     created_at = models.DateTimeField(
         _("created date"),
         default=timezone.now,
