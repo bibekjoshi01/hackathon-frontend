@@ -3,6 +3,8 @@ from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import AllowAny
 from django.db.models import Q, Avg
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 from src.parking_spot.constants import FEATURE_CHOICES, VEHICLE_TYPES
 from .serializers import ParkingSpotListSerializer, ParkingSpotDetailSerializer
@@ -80,3 +82,64 @@ class ParkingSpotRetrieveAPIView(generics.RetrieveAPIView):
     queryset = ParkingSpot.objects.filter(is_active=True)
     serializer_class = ParkingSpotDetailSerializer
     lookup_field = "uuid"
+
+
+class SearchSuggestionsAPIView(APIView):
+    """
+    API endpoint to provide search suggestions for parking spots.
+
+    This endpoint accepts a query parameter `search` and returns a list of suggestions
+    based on matches with parking spot names, addresses, or postcodes. The results
+    are filtered to include only active parking spots and limited to the top 10 matches.
+
+    Query Parameters:
+        search (str): The search input provided by the user to filter parking spots.
+                      Partial matches are supported for names, addresses, and postcodes.
+
+    Example Request:
+        GET /api/v1/public/parking-app/search-suggestions?search=park
+
+    Example Response:
+        HTTP 200 OK
+        {
+            "suggestions": [
+                "Green Park, London",
+                "Central Parking, New York"
+            ]
+        }
+
+    Response:
+        - suggestions (list): A list of up to 10 suggested matches based on the search query.
+          Each suggestion is represented as a string containing the parking spot's address 
+          or name.
+
+    Notes:
+        - The search query is case-insensitive.
+        - Results are filtered to ensure only active parking spots are included.
+        - If no matches are found, the `suggestions` list will be empty.
+
+    Returns:
+        Response: A JSON response with the matching suggestions.
+    """
+
+    def get(self, request, *args, **kwargs):
+        query = request.query_params.get("search", "").strip()
+        suggestions = []
+
+        if query:
+            # Filter ParkingSpot objects based on name, address, or postcode
+            matches = ParkingSpot.objects.filter(
+                Q(name__icontains=query)
+                | Q(address__icontains=query)
+                | Q(postcode__icontains=query),
+                is_active=True,
+            ).values("address", "name")[
+                :10
+            ]  # Limit to top 10 results
+
+            # Format suggestions as an array of addresses
+            suggestions = list({
+                match["address"].strip().lower() for match in matches
+            })
+
+        return Response({"suggestions": suggestions})
