@@ -9,6 +9,17 @@ from ..models import (
     ParkingSpotVehicleCapacity,
 )
 
+from src.user.models import User
+
+class UserListSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
+    class Meta:
+        model = User
+        fields = ["uuid", "full_name", "photo"]
+
+    def get_full_name(self, obj):
+        return obj.full_name
+
 
 class ParkingSpotListSerializer(serializers.ModelSerializer):
     total_reviews = serializers.SerializerMethodField()
@@ -44,24 +55,31 @@ class ParkingSpotListSerializer(serializers.ModelSerializer):
 
 
 class ParkingSpotFeaturesSerializer(serializers.ModelSerializer):
+    feature = serializers.CharField(source="get_feature_display")
     class Meta:
         model = ParkingSpotFeatures
         fields = ["feature"]
 
 
 class ParkingSpotVehicleCapacitySerializer(serializers.ModelSerializer):
+    vehicle_type = serializers.CharField(source="get_vehicle_type_display")
+
     class Meta:
         model = ParkingSpotVehicleCapacity
         fields = ["vehicle_type", "capacity"]
 
 
 class ParkingSpotAvailabilitySerializer(serializers.ModelSerializer):
+    day = serializers.CharField(source="get_day_display")
+
     class Meta:
         model = ParkingSpotAvailability
         fields = ["day", "start_time", "end_time"]
 
 
 class ParkingSpotReviewSerializer(serializers.ModelSerializer):
+    reviewer = UserListSerializer()
+
     class Meta:
         model = ParkingSpotReview
         fields = ["reviewer", "rating", "comments", "created_at"]
@@ -102,3 +120,9 @@ class ParkingSpotDetailSerializer(serializers.ModelSerializer):
             return 0
         total_rating = sum(reviews)
         return total_rating/total_reviews   
+    
+
+class ParkingSpotReviewCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ParkingSpotReview
+        fields = ["parking_spot", "rating", "comments"]
