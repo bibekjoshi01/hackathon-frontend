@@ -85,6 +85,8 @@ class ParkingSpotDetailSerializer(serializers.ModelSerializer):
             "rate_per_hour",
             "rate_per_day",
             "total_reviews",
+            "latitude",
+            "longitude",
             "average_rating",
             "vehicles_capacity",
             "features",

@@ -14,8 +14,8 @@ from ..models import ParkingSpot
 
 
 class ParkingSpotFilter(filters.FilterSet):
-    vehicle_type = filters.ChoiceFilter(
-        choices=VEHICLE_TYPES, method="filter_by_vehicle_type", label="Vehicle Type"
+    vehicle_types = filters.MultipleChoiceFilter(
+        choices=VEHICLE_TYPES, method="filter_by_vehicle_types", label="Vehicle Types"
     )
     features = filters.MultipleChoiceFilter(
         choices=FEATURE_CHOICES, method="filter_by_features", label="Features"
@@ -23,17 +23,22 @@ class ParkingSpotFilter(filters.FilterSet):
 
     class Meta:
         model = ParkingSpot
-        fields = ["vehicle_type"]
-
-    def filter_by_vehicle_type(self, queryset, name, value):
+        fields = ["vehicle_types", "features"]
+    
+    def filter_by_vehicle_types(self, queryset, name, value):
         """
         Custom filter to return parking spots with the given vehicle type.
         """
         # FIXME filter by available capacity
-        return queryset.filter(
-            Q(vehicles_capacity__vehicle_type=value)
-            & Q(vehicles_capacity__capacity__gt=0)
-        )
+        # return queryset.filter(
+        #     Q(vehicles_capacity__vehicle_type=value)
+        #     & Q(vehicles_capacity__capacity__gt=0)
+        # )
+        for vehicle_type in value:
+            queryset = queryset.filter(vehicles_capacity__vehicle_type=vehicle_type)
+        
+        return queryset.distinct()
+            
 
     def filter_by_features(self, queryset, name, value):
         """
