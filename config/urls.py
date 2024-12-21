@@ -5,9 +5,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
-from django.views import defaults as default_views
 from drf_spectacular.views import SpectacularAPIView
-from drf_spectacular.views import SpectacularRedocView
 from drf_spectacular.views import SpectacularSwaggerView
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
@@ -18,7 +16,7 @@ class CustomSpectacularSwaggerView(SpectacularSwaggerView):
         from rest_framework.reverse import reverse
 
         response = super().dispatch(request, *args, **kwargs)
-        if response.status_code == 401:
+        if response.status_code == 401 or response.status_code == 403:
             # Redirect the user to the login page if not authenticated
             return redirect(reverse("rest_framework:login") + f"?next={request.path}")
         return response
@@ -38,7 +36,6 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    # Static file serving when using Gunicorn + Uvicorn for local web socket development
     urlpatterns += staticfiles_urlpatterns()
 
 # API URLS
@@ -53,32 +50,4 @@ urlpatterns += [
         CustomSpectacularSwaggerView.as_view(url_name="api-schema"),
         name="swagger-ui",
     ),
-    path(
-        "api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc-ui"
-    ),
 ]
-
-if settings.DEBUG:
-    urlpatterns += [
-        path(
-            "400/",
-            default_views.bad_request,
-            kwargs={"exception": Exception("Bad Request!")},
-        ),
-        path(
-            "403/",
-            default_views.permission_denied,
-            kwargs={"exception": Exception("Permission Denied")},
-        ),
-        path(
-            "404/",
-            default_views.page_not_found,
-            kwargs={"exception": Exception("Page not Found")},
-        ),
-        path("500/", default_views.server_error),
-    ]
-
-    if "debug_toolbar" in settings.INSTALLED_APPS:
-        import debug_toolbar
-
-        urlpatterns = [path("__debug__/", include(debug_toolbar.urls))] + urlpatterns
