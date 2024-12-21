@@ -7,10 +7,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from src.parking_spot.constants import FEATURE_CHOICES, VEHICLE_TYPES
-from .serializers import ParkingSpotListSerializer, ParkingSpotDetailSerializer
+from .serializers import ParkingSpotListSerializer, ParkingSpotDetailSerializer, ParkingSpotReviewCreateSerializer
 from rest_framework.filters import SearchFilter, OrderingFilter
 
-from ..models import ParkingSpot
+from ..models import ParkingSpot, ParkingSpotReview
 
 
 class ParkingSpotFilter(filters.FilterSet):
@@ -70,15 +70,16 @@ class ParkingSpotListAPIView(generics.ListAPIView):
         longitude = self.request.query_params.get("longitude")
 
         if latitude and longitude:
-            try:
-                latitude = float(latitude)
-                longitude = float(longitude)
+            return queryset
+            # try:
+            #     latitude = float(latitude)
+            #     longitude = float(longitude)
 
-                # Haversine Formula for calculating distance
-                queryset = queryset.annotate(distance=5.5)
+            #     # Haversine Formula for calculating distance
+            #     queryset = queryset.annotate(distance=5.5)
 
-            except ValueError:
-                pass
+            # except ValueError:
+            #     pass
 
         return queryset
 
@@ -148,3 +149,14 @@ class SearchSuggestionsAPIView(APIView):
             })
 
         return Response({"suggestions": suggestions})
+
+
+class ParkingSpotReviewCreateAPIView(generics.CreateAPIView):
+    queryset = ParkingSpotReview.objects.all()
+    serializer_class = ParkingSpotReviewCreateSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(reviewer=self.request.user)
+        return super().perform_create(serializer)
+    
+

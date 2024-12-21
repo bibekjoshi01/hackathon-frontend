@@ -11,7 +11,7 @@ VEHICLE_TYPES = (
 FEATURE_CHOICES = (
     ('CCTV', 'CCTV'),
     ('EV_CHARGING', 'EV Charging'),
-    ('SECURITY-LIGHTING', 'Security Lighting'),
+    ('SECURITY_LIGHTING', 'Security Lighting'),
     ('HANDICAP_ACCESSIBLE', 'Handicap Accessible'),
     ('COVERED', 'Covered Parking'),
     ('GUARDS', 'Security Guards'),
