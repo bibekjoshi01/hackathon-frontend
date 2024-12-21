@@ -38,7 +38,7 @@ THIRD_PARTY_APPS = [
     "mptt",
 ]
 
-LOCAL_APPS = ["src.user", "src.base", "src.parking_spot"]
+LOCAL_APPS = ["src.user", "src.base", "src.parking_spot", "src.website"]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
