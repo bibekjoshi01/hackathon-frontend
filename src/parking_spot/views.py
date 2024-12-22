@@ -38,7 +38,7 @@ class ParkingSpotViewSet(ModelViewSet):
     http_method_names = ["options", "head", "get", "post", "patch"]
 
     def get_queryset(self):
-        return ParkingSpot.objects.filter(is_archived=False)
+        return ParkingSpot.objects.filter(is_archived=False, owner=self.request.user)
 
     def get_serializer_class(self):
         serializer_class = ParkingSpotListSerializer

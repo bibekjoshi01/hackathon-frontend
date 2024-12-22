@@ -199,9 +199,6 @@ class PublicUserLoginSerializer(serializers.ModelSerializer):
         self.check_user_status(user)
         # self.check_website_user(user)
 
-        context = {"request": self.context.get("request")}
-
-        permissions = []
         roles = user.groups.filter(is_archived=False, is_active=True).values_list(
             "name", flat=True
         )

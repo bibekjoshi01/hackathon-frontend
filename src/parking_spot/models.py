@@ -31,6 +31,7 @@ class ParkingSpotFeatures(models.Model):
         ParkingSpot, on_delete=models.CASCADE, related_name="features"
     )
     feature = models.CharField(choices=FEATURE_CHOICES, max_length=100)
+    is_active = models.BooleanField(default=True)
     
     def __str__(self):
         return self.feature
@@ -43,6 +44,7 @@ class ParkingSpotVehicleCapacity(models.Model):
     )
     vehicle_type = models.CharField(choices=VEHICLE_TYPES, max_length=100)
     capacity = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.parking_spot.name} - {self.vehicle_type}: {self.capacity} available"
@@ -52,6 +54,7 @@ class ParkingSpotAvailability(models.Model):
     day = models.CharField(max_length=3, choices=DAYS_OF_WEEK)
     start_time = models.TimeField(help_text="Start time for availability (HH:MM:SS)")
     end_time = models.TimeField(help_text="End time for availability (HH:MM:SS)")
+    is_active = models.BooleanField(default=True)
 
     parking_spot = models.ForeignKey(
         "ParkingSpot", on_delete=models.CASCADE, related_name="availabilities"
@@ -73,6 +76,7 @@ class ParkingSpotReview(models.Model):
     rating = models.PositiveIntegerField()
     comments = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return f"Review for {self.parking_spot.name} by {self.reviewer.username}"
@@ -87,6 +91,7 @@ class Booking(AbstractInfoModel):
     )
     vehicle_no = models.CharField(max_length=50, help_text="registeration no of vehicle")
     vehicle = models.CharField(choices=VEHICLE_TYPES, max_length=100)
+    is_active = models.BooleanField(default=True)
     
     def __str__(self):
         return self.vehicle_no
