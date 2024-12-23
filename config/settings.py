@@ -1,12 +1,8 @@
-# ruff: noqa: ERA001, E501
-"""Base settings to build other settings files upon."""
-
-from datetime import timedelta
-from pathlib import Path
-
 import environ
+from pathlib import Path
+from datetime import timedelta
 
-BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
+BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 APPS_DIR = BASE_DIR / "src"
 env = environ.Env()
 environ.Env.read_env(str(BASE_DIR / ".env"))
@@ -16,6 +12,16 @@ environ.Env.read_env(str(BASE_DIR / ".env"))
 CORS_ALLOW_ALL_ORIGINS = True
 # CORS_ALLOWED_ORGINS = env.list("CORS_ALLOWED_ORIGINS")
 # CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "http://another-origin.com"]
+
+
+# GENERAL
+# ------------------------------------------------------------------------------
+DEBUG = True
+SECRET_KEY = env(
+    "DJANGO_SECRET_KEY",
+    default="sydPDD94R0UBhmbBTsXrQ4QDskUY3cPo6cmaa9YorUYNsbzgJqDgnEONnuGpxQ4x",
+)
+ALLOWED_HOSTS = ['*', "192.168.137.1"]
 
 
 # APPS
@@ -128,6 +134,7 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
     "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
 ]
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -283,4 +290,4 @@ OAUTH_PROVIDERS = {
     }
 }
 
-SOCIAL_SECRET = "test@9085jfJdh"
+SOCIAL_SECRET = env("SOCIAL_SECRET")

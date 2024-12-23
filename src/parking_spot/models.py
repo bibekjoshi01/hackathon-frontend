@@ -3,7 +3,12 @@ from django.db import models
 from src.base.models import AbstractInfoModel
 from django.contrib.auth import get_user_model
 
-from src.parking_spot.constants import DAYS_OF_WEEK, FEATURE_CHOICES, VEHICLE_TYPES
+from src.parking_spot.constants import (
+    DAYS_OF_WEEK,
+    FEATURE_CHOICES,
+    STATUS_CHOICES,
+    VEHICLE_TYPES,
+)
 
 User = get_user_model()
 
@@ -32,7 +37,7 @@ class ParkingSpotFeatures(models.Model):
     )
     feature = models.CharField(choices=FEATURE_CHOICES, max_length=100)
     is_active = models.BooleanField(default=True)
-    
+
     def __str__(self):
         return self.feature
 
@@ -47,7 +52,9 @@ class ParkingSpotVehicleCapacity(models.Model):
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.parking_spot.name} - {self.vehicle_type}: {self.capacity} available"
+        return (
+            f"{self.parking_spot.name} - {self.vehicle_type}: {self.capacity} available"
+        )
 
 
 class ParkingSpotAvailability(models.Model):
@@ -82,17 +89,40 @@ class ParkingSpotReview(models.Model):
         return f"Review for {self.parking_spot.name} by {self.reviewer.username}"
 
 
-class Booking(AbstractInfoModel):
+class Booking(models.Model):
     parking_spot = models.ForeignKey(
         ParkingSpot, on_delete=models.CASCADE, related_name="bookings"
     )
     user = models.ForeignKey(
         User, on_delete=models.PROTECT, related_name="user_bookings"
     )
-    vehicle_no = models.CharField(max_length=50, help_text="registeration no of vehicle")
+    status = models.CharField(choices=STATUS_CHOICES, max_length=20, default="PENDING")
+    booking_no = models.CharField(max_length=50, help_text="booking no")
+    start_time = models.DateTimeField(help_text="Start time for booking")
+    end_time = models.DateTimeField(
+        null=True, blank=True, help_text="End time for booking"
+    )
+    amount = models.DecimalField(
+        max_digits=10, decimal_places=2, help_text="Booking amount"
+    )
+    payment_status = models.CharField(
+        choices=[("paid", "Paid"), ("unpaid", "Unpaid")],
+        max_length=20,
+        default="unpaid",
+    )
+    vehicle_no = models.CharField(
+        max_length=50, help_text="registeration no of vehicle"
+    )
     vehicle = models.CharField(choices=VEHICLE_TYPES, max_length=100)
     is_active = models.BooleanField(default=True)
-    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["parking_spot"]),
+            models.Index(fields=["start_time"]),
+        ]
+
     def __str__(self):
-        return self.vehicle_no
-    
+        return f"{self.vehicle_no} ({self.status})"

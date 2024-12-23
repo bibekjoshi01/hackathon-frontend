@@ -1,6 +1,12 @@
 from django.urls import path
 
-from .views import ParkingSpotListAPIView, ParkingSpotRetrieveAPIView, SearchSuggestionsAPIView, ParkingSpotReviewCreateAPIView
+from .views import (
+    BookingCreateAPIView,
+    ParkingSpotListAPIView,
+    ParkingSpotRetrieveAPIView,
+    SearchSuggestionsAPIView,
+    ParkingSpotReviewCreateAPIView,
+)
 
 urlpatterns = [
     path("parking-spots", ParkingSpotListAPIView.as_view(), name="parking_spots"),
@@ -9,6 +15,15 @@ urlpatterns = [
         ParkingSpotRetrieveAPIView.as_view(),
         name="parking_spot",
     ),
-    path("search-suggestions", SearchSuggestionsAPIView.as_view(), name="search_suggestions"),
-    path("parking-spots/create-review", ParkingSpotReviewCreateAPIView.as_view(), name="create_review"),
+    path(
+        "search-suggestions",
+        SearchSuggestionsAPIView.as_view(),
+        name="search_suggestions",
+    ),
+    path(
+        "parking-spots/create-review",
+        ParkingSpotReviewCreateAPIView.as_view(),
+        name="create_review",
+    ),
+    path("create-booking", BookingCreateAPIView.as_view(), name="create-booking"),
 ]

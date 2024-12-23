@@ -26,3 +26,10 @@ DAYS_OF_WEEK = [
     ("SAT", "Saturday"),
     ("SUN", "Sunday"),
 ]
+
+STATUS_CHOICES = [
+    ('PENDING', 'Pending'),
+    ('CONFIRMED', 'Confirmed'),
+    ('COMPLETED', 'Completed'),
+    ('CANCELLED', 'Cancelled'),
+]

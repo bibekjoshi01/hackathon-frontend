@@ -5,12 +5,18 @@ from rest_framework.permissions import AllowAny
 from django.db.models import Q, Avg
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 
 from src.parking_spot.constants import FEATURE_CHOICES, VEHICLE_TYPES
-from .serializers import ParkingSpotListSerializer, ParkingSpotDetailSerializer, ParkingSpotReviewCreateSerializer
+from .serializers import (
+    BookingSerializer,
+    ParkingSpotListSerializer,
+    ParkingSpotDetailSerializer,
+    ParkingSpotReviewCreateSerializer,
+)
 from rest_framework.filters import SearchFilter, OrderingFilter
 
-from ..models import ParkingSpot, ParkingSpotReview
+from ..models import Booking, ParkingSpot, ParkingSpotReview
 
 
 class ParkingSpotFilter(filters.FilterSet):
@@ -24,7 +30,7 @@ class ParkingSpotFilter(filters.FilterSet):
     class Meta:
         model = ParkingSpot
         fields = ["vehicle_types", "features"]
-    
+
     def filter_by_vehicle_types(self, queryset, name, value):
         """
         Custom filter to return parking spots with the given vehicle type.
@@ -36,9 +42,8 @@ class ParkingSpotFilter(filters.FilterSet):
         # )
         for vehicle_type in value:
             queryset = queryset.filter(vehicles_capacity__vehicle_type=vehicle_type)
-        
+
         return queryset.distinct()
-            
 
     def filter_by_features(self, queryset, name, value):
         """
@@ -116,7 +121,7 @@ class SearchSuggestionsAPIView(APIView):
 
     Response:
         - suggestions (list): A list of up to 10 suggested matches based on the search query.
-          Each suggestion is represented as a string containing the parking spot's address 
+          Each suggestion is represented as a string containing the parking spot's address
           or name.
 
     Notes:
@@ -144,9 +149,7 @@ class SearchSuggestionsAPIView(APIView):
             ]  # Limit to top 10 results
 
             # Format suggestions as an array of addresses
-            suggestions = list({
-                match["address"].strip().lower() for match in matches
-            })
+            suggestions = list({match["address"].strip().lower() for match in matches})
 
         return Response({"suggestions": suggestions})
 
@@ -158,8 +161,28 @@ class ParkingSpotReviewCreateAPIView(generics.CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(reviewer=self.request.user)
         return super().perform_create(serializer)
-    
 
 
+class BookingCreateAPIView(generics.CreateAPIView):
+    """
+    API endpoint for creating a new booking.
+    """
 
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
 
+    def post(self, request, *args, **kwargs):
+        serializer = BookingSerializer(data=request.data)
+        if serializer.is_valid():
+            booking = serializer.save(user=request.user)
+            return Response(
+                {
+                    "message": "Booking created successfully.",
+                    "booking_no": booking.booking_no,
+                    "status": booking.status,
+                    "start_time": booking.start_time,
+                    "end_time": booking.end_time,
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
