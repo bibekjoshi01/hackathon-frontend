@@ -1,7 +1,14 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from .views import BookingListView, BookingStatusUpdateView, ParkingSpotViewSet
+from .views import (
+    BookingListView,
+    BookingStatusUpdateView,
+    ParkingSpotAvailabilityDeleteView,
+    ParkingSpotFeaturesDeleteView,
+    ParkingSpotVehicleCapacityDeleteView,
+    ParkingSpotViewSet,
+)
 
 router = DefaultRouter(trailing_slash=False)
 
@@ -13,6 +20,21 @@ urlpatterns = [
         "bookings/<int:pk>/update-status",
         BookingStatusUpdateView.as_view(),
         name="booking-status-update",
+    ),
+    path(
+        "availability/<int:pk>/delete/",
+        ParkingSpotAvailabilityDeleteView.as_view(),
+        name="parking-spot-availability-delete",
+    ),
+    path(
+        "vehicle-capacity/<int:pk>/delete/",
+        ParkingSpotVehicleCapacityDeleteView.as_view(),
+        name="parking-spot-vehicle-capacity-delete",
+    ),
+    path(
+        "features/<int:pk>/delete/",
+        ParkingSpotFeaturesDeleteView.as_view(),
+        name="parking-spot-features-delete",
     ),
     *router.urls,
 ]

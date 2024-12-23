@@ -7,6 +7,8 @@ from rest_framework import generics
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from .serializers import BookingSerializer, BookingStatusUpdateSerializer
+from rest_framework import status
+from rest_framework.views import APIView
 
 from src.parking_spot.serializers import (
     BookingSerializer,
@@ -15,6 +17,11 @@ from src.parking_spot.serializers import (
     ParkingSpotDetailSerializer,
     ParkingSpotListSerializer,
     ParkingSpotUpdateSerializer,
+)
+from .models import (
+    ParkingSpotAvailability,
+    ParkingSpotVehicleCapacity,
+    ParkingSpotFeatures,
 )
 
 
@@ -60,6 +67,77 @@ class ParkingSpotViewSet(ModelViewSet):
 
         return serializer_class
 
+
+class ParkingSpotAvailabilityDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            availability = ParkingSpotAvailability.objects.get(id=pk)
+            if availability.parking_spot.owner != request.user:
+                return Response(
+                    {"detail": "You do not have permission to delete this availability."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+            availability.delete()
+            return Response(
+                {"detail": "Parking spot availability deleted successfully."},
+                status=status.HTTP_204_NO_CONTENT,
+            )
+        except ParkingSpotAvailability.DoesNotExist:
+            return Response(
+                {"detail": "Parking spot availability not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+
+class ParkingSpotVehicleCapacityDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            vehicle_capacity = ParkingSpotVehicleCapacity.objects.get(id=pk)
+            if vehicle_capacity.parking_spot.owner != request.user:
+                return Response(
+                    {"detail": "You do not have permission to delete this vehicle capacity."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+            vehicle_capacity.delete()
+            return Response(
+                {"detail": "Parking spot vehicle capacity deleted successfully."},
+                status=status.HTTP_204_NO_CONTENT,
+            )
+        except ParkingSpotVehicleCapacity.DoesNotExist:
+            return Response(
+                {"detail": "Parking spot vehicle capacity not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+
+class ParkingSpotFeaturesDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            feature = ParkingSpotFeatures.objects.get(id=pk)
+            if feature.parking_spot.owner != request.user:
+                return Response(
+                    {"detail": "You do not have permission to delete this feature."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+            feature.delete()
+            return Response(
+                {"detail": "Parking spot feature deleted successfully."},
+                status=status.HTTP_204_NO_CONTENT,
+            )
+        except ParkingSpotFeatures.DoesNotExist:
+            return Response(
+                {"detail": "Parking spot feature not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+
+# Booking Listing APIs
 
 class BookingListView(generics.ListAPIView):
     serializer_class = BookingSerializer
