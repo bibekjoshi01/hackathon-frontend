@@ -5,6 +5,7 @@ from src.base.serializers import AbstractInfoRetrieveSerializer
 from src.libs.get_context import get_user_by_context
 
 from .models import (
+    Booking,
     ParkingSpot,
     ParkingSpotAvailability,
     ParkingSpotFeatures,
@@ -242,3 +243,15 @@ class ParkingSpotUpdateSerializer(serializers.ModelSerializer):
             "message": "Parking Spot updated successfully.",
             "id": instance.id,
         }
+
+
+class BookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = "__all__"
+
+
+class BookingStatusUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = ['status'] 
