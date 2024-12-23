@@ -21,12 +21,13 @@ SECRET_KEY = env(
     "DJANGO_SECRET_KEY",
     default="sydPDD94R0UBhmbBTsXrQ4QDskUY3cPo6cmaa9YorUYNsbzgJqDgnEONnuGpxQ4x",
 )
-ALLOWED_HOSTS = ['*', "192.168.137.1"]
+ALLOWED_HOSTS = ["*", "192.168.137.1"]
 
 
 # APPS
 # ------------------------------------------------------------------------------
 DJANGO_APPS = [
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -117,16 +118,16 @@ DATABASES = {
 # SERVER_EMAIL = env("SERVER_EMAIL")
 # EMAIL_TIMEOUT = 5
 
-EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
-EMAIL_USE_TLS=True
-EMAIL_PORT=587
-EMAIL_HOST='smtp.gmail.com'
-DEFAULT_FROM_EMAIL='bibekjoshi34@gmail.com'
-SERVER_EMAIL='bibekjoshi34@gmail.com'
-EMAIL_HOST_USER='bibekjoshi34@gmail.com'
-EMAIL_HOST_PASSWORD='qcfgybnlrmollnhe'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST = "smtp.gmail.com"
+DEFAULT_FROM_EMAIL = "bibekjoshi34@gmail.com"
+SERVER_EMAIL = "bibekjoshi34@gmail.com"
+EMAIL_HOST_USER = "bibekjoshi34@gmail.com"
+EMAIL_HOST_PASSWORD = "qcfgybnlrmollnhe"
 
-# PASSWORDS 
+# PASSWORDS
 # ------------------------------------------------------------------------------
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
@@ -291,3 +292,36 @@ OAUTH_PROVIDERS = {
 }
 
 SOCIAL_SECRET = env("SOCIAL_SECRET")
+
+ADMIN_SITE_HEADER = "Parkify Admin"
+
+JAZZMIN_SETTINGS = {
+    "site_title": "Parkify Admin",
+    "site_header": "Admin Dashboard",
+    "welcome_sign": "Welcome to the Parkify",
+    "copyright": "Parkify Admin",
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+    ],
+    "usermenu_links": [
+        {"model": "auth.user"},
+    ],
+    "hide_models": [
+        "auth.group",
+        "rest_framework.authtoken",
+        "rest_framework_simplejwt.tokenblacklist",
+        "rest_framework_simplejwt.blackListedToken",
+    ],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "order_with_respect_to": ["auth"],
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "user.user": "fas fa-user",
+        "website.NewsletterSubscriber": "fas fa-envelope",
+        "website.Feedback": "fa fa-comment",
+    },
+    "custom_css": "/css/custom_admin.css",
+    "custom_js": None,
+    "show_ui_builder": False,
+}
