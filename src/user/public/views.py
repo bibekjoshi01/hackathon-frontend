@@ -14,7 +14,6 @@ from src.user.public.messages import (
     PROFILE_UPDATED,
     VERIFICATION_EMAIL_SENT,
 )
-from src.user.public.permissions import WebsiteUserBasePermission
 from src.user.public.serializers import (
     # PublicUserLoginSerializer,
     PublicUserLoginSerializer,
@@ -29,7 +28,7 @@ from src.user.public.serializers import (
     # PublicUserVerifyAccountSerializer,
 )
 from src.user.models import User, UserAccountVerification
-from src.user.throttling import LoginThrottle
+from .throttling import LoginThrottle
 from src.user.utils.verification import send_user_account_verification_email
 
 
@@ -66,7 +65,7 @@ class PublicUserSignInAPIView(APIView):
     """User Login API View"""
 
     permission_classes = [AllowAny]
-    # throttle_classes = [LoginThrottle]
+    throttle_classes = [LoginThrottle]
     serializer_class = PublicUserLoginSerializer
 
     def handle_verification(self, data, request):

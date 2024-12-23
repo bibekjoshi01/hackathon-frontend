@@ -20,5 +20,5 @@ def generate_unique_user_username(user_type: str):
     username = f"{title}-{extra[5:]}-{extra[:5]}"
 
     if User.objects.filter(username=username).exists():
-        generate_unique_user_username(user_type)  # Added user_type argument
+        generate_unique_user_username(user_type)
     return username

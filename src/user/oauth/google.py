@@ -18,6 +18,7 @@ class GoogleOAuth(OAuthProvider):
     Google OAuth provider class for validating authentication tokens
     and retrieving user information.
     """
+
     TOKEN_INFO_API = "https://oauth2.googleapis.com/tokeninfo"
     USER_INFO_API = "https://www.googleapis.com/oauth2/v3/userinfo"
 
@@ -38,7 +39,9 @@ class GoogleOAuth(OAuthProvider):
             KeyError: If the expected fields are missing in the API response.
         """
         if not cls.TOKEN_INFO_API or not cls.USER_INFO_API:
-            raise NotImplementedError("Subclasses must define token_info_api and user_info_api.")
+            raise NotImplementedError(
+                "Subclasses must define token_info_api and user_info_api."
+            )
 
         if not auth_token:
             raise ValidationError("Please provide auth token.")

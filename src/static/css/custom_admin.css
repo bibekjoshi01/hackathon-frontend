@@ -1,0 +1,10 @@
+.table thead th {
+  color: #007bfe !important; /* Set to the color you want */
+  font-weight: bold; /* Ensure it's bold */
+}
+
+.login-logo img{
+  max-width: 200px;
+  height: auto;
+}
+    

@@ -23,9 +23,12 @@ class OAuthProvider:
 
         if not provider_settings:
             raise ValueError(
-                f"{provider_name.capitalize()} OAuth settings are not configured in settings.OAUTH_PROVIDERS.")
+                f"{provider_name.capitalize()} OAuth settings are not configured in settings.OAUTH_PROVIDERS."
+            )
 
-        if not provider_settings.get("client_id") or not provider_settings.get("client_secret"):
+        if not provider_settings.get("client_id") or not provider_settings.get(
+            "client_secret"
+        ):
             raise ValueError(
                 f"{provider_name.capitalize()} OAuth settings must include 'client_id' and 'client_secret'."
             )

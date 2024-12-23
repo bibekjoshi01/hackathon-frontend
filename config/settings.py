@@ -54,7 +54,6 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -298,6 +297,7 @@ ADMIN_SITE_HEADER = "Parkify Admin"
 JAZZMIN_SETTINGS = {
     "site_title": "Parkify Admin",
     "site_header": "Admin Dashboard",
+    "login_logo": "/images/logo.png",
     "welcome_sign": "Welcome to the Parkify",
     "copyright": "Parkify Admin",
     "topmenu_links": [

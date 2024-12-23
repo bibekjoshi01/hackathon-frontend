@@ -1,9 +1,0 @@
-{% extends "admin/login.html" %}
-{% load static %}  <!-- Add this line to load the static tag -->
-
-{% block content %}
-    <div class="login-logo-container" style="text-align: center;">
-        <img src="{% static 'images/logo.jpeg' %}" alt="Site Logo" class="login-logo">
-    </div>
-    {{ block.super }}  <!-- This ensures the original login form remains intact -->
-{% endblock %}
