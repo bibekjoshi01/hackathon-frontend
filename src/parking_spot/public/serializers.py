@@ -103,6 +103,7 @@ class ParkingSpotDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = ParkingSpot
         fields = [
+            "id",
             "name",
             "cover_image",
             "description",
