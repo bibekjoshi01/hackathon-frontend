@@ -9,7 +9,7 @@ from rest_framework import status
 
 from src.parking_spot.constants import FEATURE_CHOICES, VEHICLE_TYPES
 from .serializers import (
-    BookingSerializer,
+    BookingCreateSerializer,
     ParkingSpotListSerializer,
     ParkingSpotDetailSerializer,
     ParkingSpotReviewCreateSerializer,
@@ -169,10 +169,10 @@ class BookingCreateAPIView(generics.CreateAPIView):
     """
 
     queryset = Booking.objects.all()
-    serializer_class = BookingSerializer
+    serializer_class = BookingCreateSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = BookingSerializer(data=request.data)
+        serializer = BookingCreateSerializer(data=request.data)
         if serializer.is_valid():
             booking = serializer.save(user=request.user)
             return Response(
@@ -182,6 +182,7 @@ class BookingCreateAPIView(generics.CreateAPIView):
                     "status": booking.status,
                     "start_time": booking.start_time,
                     "end_time": booking.end_time,
+                    "payment_status": booking.payment_status,
                 },
                 status=status.HTTP_201_CREATED,
             )

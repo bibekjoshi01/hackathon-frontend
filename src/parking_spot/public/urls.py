@@ -25,5 +25,5 @@ urlpatterns = [
         ParkingSpotReviewCreateAPIView.as_view(),
         name="create_review",
     ),
-    path("create-booking", BookingCreateAPIView.as_view(), name="create-booking"),
+    path("create-booking", BookingCreateAPIView.as_view(), name="create_booking"),
 ]

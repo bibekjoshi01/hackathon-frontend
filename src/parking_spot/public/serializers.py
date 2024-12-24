@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.utils import timezone
+from decimal import Decimal
 
 from src.parking_spot.utils import generate_booking_no
 
@@ -138,7 +139,7 @@ class ParkingSpotReviewCreateSerializer(serializers.ModelSerializer):
         fields = ["parking_spot", "rating", "comments"]
 
 
-class BookingSerializer(serializers.ModelSerializer):
+class BookingCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = [
@@ -168,8 +169,8 @@ class BookingSerializer(serializers.ModelSerializer):
 
         # Calculate the booking duration in hours
         duration_seconds = (data["end_time"] - data["start_time"]).total_seconds()
-        duration_hours = duration_seconds / 3600
-
+        duration_hours = Decimal(duration_seconds) / Decimal(3600) 
+        
         # Calculate the expected amount
         if duration_hours <= 24:
             calculated_amount = rate_per_hour * duration_hours
