@@ -6,6 +6,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+
+from src.parking_spot.constants import STATUS_CHOICES
 from .serializers import BookingSerializer, BookingStatusUpdateSerializer
 from rest_framework import status
 from rest_framework.views import APIView
@@ -76,7 +78,9 @@ class ParkingSpotAvailabilityDeleteView(APIView):
             availability = ParkingSpotAvailability.objects.get(id=pk)
             if availability.parking_spot.owner != request.user:
                 return Response(
-                    {"detail": "You do not have permission to delete this availability."},
+                    {
+                        "detail": "You do not have permission to delete this availability."
+                    },
                     status=status.HTTP_403_FORBIDDEN,
                 )
             availability.delete()
@@ -99,7 +103,9 @@ class ParkingSpotVehicleCapacityDeleteView(APIView):
             vehicle_capacity = ParkingSpotVehicleCapacity.objects.get(id=pk)
             if vehicle_capacity.parking_spot.owner != request.user:
                 return Response(
-                    {"detail": "You do not have permission to delete this vehicle capacity."},
+                    {
+                        "detail": "You do not have permission to delete this vehicle capacity."
+                    },
                     status=status.HTTP_403_FORBIDDEN,
                 )
             vehicle_capacity.delete()
@@ -139,6 +145,7 @@ class ParkingSpotFeaturesDeleteView(APIView):
 
 # Booking Listing APIs
 
+
 class BookingListView(generics.ListAPIView):
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
@@ -166,15 +173,19 @@ class BookingStatusUpdateView(generics.UpdateAPIView):
             raise PermissionDenied("You do not have permission to update this booking.")
         return obj
 
+    def validate_status(self, status):
+        STATUS_KEYS = {choice[0] for choice in STATUS_CHOICES}
+        if status not in STATUS_KEYS:
+            return Response({"detail": "Invalid status."}, status=400)
+        return status
+    
     def update(self, request, *args, **kwargs):
         """
         Override to handle the update process for status change.
         """
         booking = self.get_object()
         status = request.data.get("status")
-        if status not in ["paid", "unpaid"]:
-            return Response({"detail": "Invalid status."}, status=400)
-
+        self.validate_status(status)
         booking.status = status
         booking.save()
 
