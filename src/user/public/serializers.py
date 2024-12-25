@@ -7,6 +7,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models import Q
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.hashers import check_password
 
 # Rest Framework Imports
 from rest_framework import serializers
@@ -14,11 +15,17 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 # Custom Imports
 from src.user.oauth import AuthTokenValidator, AuthProviders
-from src.user.models import User, UserAccountVerification, UserRole
+from src.user.models import (
+    User,
+    UserAccountVerification,
+    UserForgetPasswordRequest,
+    UserRole,
+)
 from src.user.utils.generate_username import generate_unique_user_username
-from src.user.utils.verification import send_user_account_verification_email
+from src.user.utils.verification import send_user_account_verification_email, send_user_forget_password_email
 from .messages import (
     ACCOUNT_DISABLED,
+    ACCOUNT_NOT_FOUND,
     ALREADY_VERIFIED,
     ERROR_MESSAGES,
     INVALID_CREDENTIALS,
@@ -27,16 +34,24 @@ from .messages import (
     LINK_EXPIRED,
     LOGIN_SUCCESS,
     PASSWORDS_NOT_MATCH,
+    SAME_OLD_NEW_PASSWORD,
     UNKNOWN_ERROR,
     VERIFICATION_EMAIL_SENT,
 )
 
 
 class PublicUserSocialAuthSerializer(serializers.Serializer):
+    ACCOUNT_TYPES = (
+        ("DRIVER", "Driver"),
+        ("OWNER", "Owner"),
+    )
     third_party_app = serializers.ChoiceField(choices=AuthProviders.choices())
     auth_token = serializers.CharField()
+    account_type = serializers.ChoiceField(choices=ACCOUNT_TYPES)
 
-    def register_or_login_user(self, user_info: Dict) -> Dict[str, str | int]:
+    def register_or_login_user(
+        self, user_info: Dict, account_type: str
+    ) -> Dict[str, str | int]:
         """
         Registers a new user or logs in an existing one based on the third-party OAuth response.
         """
@@ -65,12 +80,38 @@ class PublicUserSocialAuthSerializer(serializers.Serializer):
                 last_name=user_info.get("last_name"),
             )
 
+            if account_type == "DRIVER":
+                user_group = UserRole.objects.get(codename="DRIVER")
+
+            elif account_type == "OWNER":
+                user_group = UserRole.objects.get(codename="OWNER")
+
+                user.groups.add(user_group)
+
             user.created_by = user
 
         user.last_login = timezone.now()
         user.save()
 
-        return {"uuid": user.uuid, "tokens": user.tokens, "full_name": user.full_name}
+        roles = user.groups.filter(is_archived=False, is_active=True).values_list(
+            "name", flat=True
+        )
+
+        return {
+            "message": LOGIN_SUCCESS,
+            "status": "success",
+            "id": user.id,
+            "uuid": user.uuid,
+            "first_name": user.first_name,
+            "middle_name": user.middle_name,
+            "last_name": user.last_name,
+            "phone_no": user.phone_no,
+            "is_email_verified": user.is_email_verified,
+            "is_phone_verified": user.is_phone_verified,
+            "email": user.email,
+            "tokens": user.tokens,
+            "roles": roles,
+        }
 
     def validate(self, attrs) -> Dict[str, Union[str, int]]:
         provider = attrs.get("third_party_app", "")
@@ -78,7 +119,9 @@ class PublicUserSocialAuthSerializer(serializers.Serializer):
 
         user_info = AuthTokenValidator.validate(provider, auth_token)
 
-        return self.register_or_login_user(user_info)
+        return self.register_or_login_user(
+            user_info, account_type=attrs["account_type"]
+        )
 
 
 class PublicUserSignUpSerializer(serializers.ModelSerializer):
@@ -236,7 +279,9 @@ class PublicUserLoginSerializer(serializers.ModelSerializer):
 
     def check_website_user(self, user):
         try:
-            website_user = UserRole.objects.get(Q(codename="DRIVER") | Q(codename="OWNER"))
+            website_user = UserRole.objects.get(
+                Q(codename="DRIVER") | Q(codename="OWNER")
+            )
         except UserRole.DoesNotExist as err:
             raise serializers.ValidationError({"error": UNKNOWN_ERROR}) from err
 
@@ -409,4 +454,98 @@ class PublicUserVerifyAccountSerializer(serializers.Serializer):
         user_instance.save()
         verification_request.is_archived = True
         verification_request.save()
+        return validated_data
+
+
+class PublicUserForgetPasswordRequestSerializer(serializers.Serializer):
+    """User Forget Password Request Serializer"""
+
+    email = serializers.EmailField(required=True)
+    redirect_url = serializers.CharField(required=True, help_text="forget-password")
+
+    def validate(self, attrs):
+        email = attrs.get("email", "")
+        try:
+            user = User.objects.get(email=email)
+            if not user.is_active:
+                raise serializers.ValidationError({"email": ACCOUNT_DISABLED})
+            attrs["user"] = user
+        except User.DoesNotExist as err:
+            raise serializers.ValidationError(
+                {"email": ACCOUNT_NOT_FOUND.format(email=email)},
+            ) from err
+
+        return attrs
+
+    def create(self, validated_data):
+        user = validated_data.pop("user", None)
+        redirect_url = validated_data.pop("redirect_url", None)
+
+        if user is not None:
+            # Filter forget password requests by user and is_archived flag
+            forget_password_requests = UserForgetPasswordRequest.objects.filter(
+                user=user, is_archived=False
+            )
+            # Archive the filtered requests
+            forget_password_requests.update(is_archived=True)
+            # Send the email
+            send_user_forget_password_email(
+                recipient_email=validated_data["email"],
+                user_id=user.id,
+                request=self.context["request"],
+                redirect_url=redirect_url.strip("/"),
+            )
+
+        return validated_data
+
+
+class PublicUserForgetPasswordSerializer(serializers.Serializer):
+    """User Forget Password Serializer"""
+
+    token = serializers.CharField(max_length=64, required=True)
+    new_password = serializers.CharField(max_length=32, required=True)
+    confirm_password = serializers.CharField(max_length=32, required=True)
+
+    def validate(self, attrs):
+        token = attrs.get("token")
+        new_password = attrs.get("new_password")
+        confirm_password = attrs.get("confirm_password")
+
+        try:
+            forget_password_request = UserForgetPasswordRequest.objects.get(
+                token=token, is_archived=False
+            )
+            now = timezone.now()
+            delta = now - forget_password_request.created_at
+            if delta > timedelta(minutes=settings.AUTH_LINK_EXP_TIME):
+                forget_password_request.is_archived = True
+                forget_password_request.save()
+                raise serializers.ValidationError({"token": LINK_EXPIRED})
+        except UserForgetPasswordRequest.DoesNotExist as err:
+            raise serializers.ValidationError({"token": INVALID_LINK}) from err
+
+        user = forget_password_request.user
+        old_password = user.password
+        attrs["forget_password_request"] = forget_password_request
+
+        # Check if new password and old password are same
+        if check_password(new_password, old_password):
+            raise serializers.ValidationError({"new_password": SAME_OLD_NEW_PASSWORD})
+
+        # Check if new password and confirm password match
+        if new_password != confirm_password:
+            raise serializers.ValidationError({"confirm_password": PASSWORDS_NOT_MATCH})
+
+        return attrs
+
+    def create(self, validated_data):
+        new_password = validated_data["new_password"]
+        forget_password_request = validated_data.get("forget_password_request")
+
+        user = forget_password_request.user
+        user.set_password(new_password)
+        user.save()
+        forget_password_request.is_archived = True
+        forget_password_request.save()
+
         return validated_data

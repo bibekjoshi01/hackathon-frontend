@@ -11,21 +11,21 @@ from rest_framework.throttling import AnonRateThrottle
 from src.user.public.messages import (
     ACCOUNT_VERIFIED,
     LOGOUT_SUCCESS,
+    PASSWORD_CHANGED,
+    PASSWORD_RESET_LINK_SENT,
     PROFILE_UPDATED,
     VERIFICATION_EMAIL_SENT,
 )
 from src.user.public.serializers import (
-    # PublicUserLoginSerializer,
+    PublicUserForgetPasswordRequestSerializer,
+    PublicUserForgetPasswordSerializer,
     PublicUserLoginSerializer,
     PublicUserLogoutSerializer,
     PublicUserProfileSerializer,
     PublicUserProfileUpdateSerializer,
-    # PublicUserProfileSerializer,
-    # PublicUserProfileUpdateSerializer,
     PublicUserSocialAuthSerializer,
     PublicUserSignUpSerializer,
     PublicUserVerifyAccountSerializer,
-    # PublicUserVerifyAccountSerializer,
 )
 from src.user.models import User, UserAccountVerification
 from .throttling import LoginThrottle
@@ -164,4 +164,41 @@ class PublicUserProfileUpdateView(generics.UpdateAPIView):
             self.perform_update(serializer)
             serializer.save()
             return Response({"message": PROFILE_UPDATED}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PublicUserForgetPasswordRequestView(APIView):
+    """Forget Password Request View"""
+
+    permission_classes = [AllowAny]
+    serializer_class = PublicUserForgetPasswordRequestSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(
+            data=request.data,
+            context={"request": request},
+        )
+        if serializer.is_valid(raise_exception=True):
+            validated_data = serializer.validated_data
+            email = validated_data["email"]
+            serializer.save()
+            response_message = PASSWORD_RESET_LINK_SENT.format(email=email)
+            return Response({"message": response_message}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PublicUserForgetPasswordView(APIView):
+    """User Forget Password View"""
+
+    permission_classes = [AllowAny]
+    serializer_class = PublicUserForgetPasswordSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(
+            data=request.data,
+            context={"request": request},
+        )
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response({"message": PASSWORD_CHANGED}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

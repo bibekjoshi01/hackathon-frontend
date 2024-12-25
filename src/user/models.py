@@ -291,3 +291,18 @@ class UserAccountVerification(models.Model):
 
     def __str__(self):
         return f"User Id: {self.user.id!s} + '-' + {self.token}"
+
+
+class UserForgetPasswordRequest(models.Model):
+    """User Forget Password Requests"""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    token = models.CharField(max_length=256)
+    created_at = models.DateTimeField()
+    is_archived = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-id"]
+
+    def __str__(self):
+        return f"User Id: {self.user.id!s} + '-' + {self.token}"

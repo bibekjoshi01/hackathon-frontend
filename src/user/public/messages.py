@@ -36,5 +36,6 @@ SAME_OLD_NEW_PASSWORD = _("New password must be different from old password.")
 LINK_EXPIRED = _("Link has expired. Please try again.")
 INVALID_LINK = _("Invalid link. Please try again.")
 ALREADY_VERIFIED = _("Account already verified. Please log in.")
+USER_NOT_FOUND = _("User not found.")
 
 UNKNOWN_ERROR = _("An Unknown error occured.")
