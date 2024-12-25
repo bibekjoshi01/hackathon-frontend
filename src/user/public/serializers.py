@@ -80,17 +80,17 @@ class PublicUserSocialAuthSerializer(serializers.Serializer):
                 last_name=user_info.get("last_name"),
             )
 
-            if account_type == "DRIVER":
-                user_group = UserRole.objects.get(codename="DRIVER")
-                user.save()
-
-            elif account_type == "OWNER":
-                user_group = UserRole.objects.get(codename="OWNER")
-
-                user.groups.add(user_group)
-                user.save()
-
             user.created_by = user
+        
+        if account_type == "DRIVER":
+            user_group = UserRole.objects.get(codename="DRIVER")
+            user.save()
+
+        elif account_type == "OWNER":
+            user_group = UserRole.objects.get(codename="OWNER")
+
+            user.groups.add(user_group)
+            user.save()
 
         user.last_login = timezone.now()
         user.save()
