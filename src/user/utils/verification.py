@@ -58,9 +58,9 @@ def send_user_forget_password_email(
     request,
     redirect_url="forget-password",
 ):
+    current_site = get_current_site(request)
     origin_url = request.headers.get("origin")
     lock_url = f'http://{current_site.domain}{static("images/icons/lock.png")}'
-    current_site = get_current_site(request)
 
     try:
         user = User.objects.get(id=user_id)
