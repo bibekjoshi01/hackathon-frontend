@@ -102,8 +102,7 @@ class UserAdmin(admin.ModelAdmin):
         return True
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        return True
 
 
-# Register the customized UserAdmin
 admin.site.register(User, UserAdmin)
