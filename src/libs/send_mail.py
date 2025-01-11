@@ -23,7 +23,7 @@ def get_basic_urls(request):
     current_site = get_current_site(request)
     origin_url = request.headers.get("origin")
     domain = current_site.domain
-    base_static_url = f'http://{domain}{static("images/")}'
+    base_static_url = f'https://{domain}{static("images/")}'
 
     # Constructing URLs
     logo = f"{base_static_url}logo.jpeg"

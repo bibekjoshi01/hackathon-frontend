@@ -18,7 +18,7 @@ def send_user_account_verification_email(
 ):
     current_site = get_current_site(request)
     origin_url = request.headers.get("origin")
-    lock_url = f'http://{current_site.domain}{static("images/icons/lock.png")}'
+    lock_url = f'https://{current_site.domain}{static("images/icons/lock.png")}'
 
     try:
         user = User.objects.get(id=user_id)
@@ -60,7 +60,7 @@ def send_user_forget_password_email(
 ):
     current_site = get_current_site(request)
     origin_url = request.headers.get("origin")
-    lock_url = f'http://{current_site.domain}{static("images/icons/lock.png")}'
+    lock_url = f'https://{current_site.domain}{static("images/icons/lock.png")}'
 
     try:
         user = User.objects.get(id=user_id)
